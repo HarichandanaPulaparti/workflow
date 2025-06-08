@@ -10,6 +10,12 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AltRouteIcon from '@mui/icons-material/AltRoute';
 
+interface Condition {
+  id: string;
+  label: string;
+  expression: string;
+}
+
 interface DecisionNodeProps {
   data: {
     label: string;
@@ -17,12 +23,15 @@ interface DecisionNodeProps {
     collapsed?: boolean;
     config?: {
       name?: string;
-      condition?: string;
+      condition?: string; // legacy
+      conditions?: Condition[];
     };
   };
 }
 
 const DecisionNode: React.FC<DecisionNodeProps> = ({ data }) => {
+  const conditions = data.config?.conditions || [];
+
   return (
     <Paper
       elevation={3}
@@ -71,14 +80,33 @@ const DecisionNode: React.FC<DecisionNodeProps> = ({ data }) => {
 
       {/* Body */}
       <Box px={1.5} py={1}>
-        <Typography fontSize={12} color="text.secondary">
-          {data.config?.condition || 'condition expression'}
-        </Typography>
+        {conditions.length > 0 ? (
+          conditions.map((cond) => (
+            <Typography key={cond.id} fontSize={12} color="text.secondary">
+              {cond.label}: {cond.expression}
+            </Typography>
+          ))
+        ) : (
+          <Typography fontSize={12} color="text.secondary">
+            {data.config?.condition || 'condition expression'}
+          </Typography>
+        )}
       </Box>
 
       <Handle type="target" position={Position.Top} />
-      <Handle type="source" position={Position.Bottom} id="yes" style={{ left: '30%' }} />
-      <Handle type="source" position={Position.Bottom} id="no" style={{ left: '70%' }} />
+
+      {conditions.map((cond, index) => (
+        <Handle
+          key={cond.id}
+          id={cond.id}
+          type="source"
+          position={Position.Bottom}
+          style={{
+            left: `${((index + 1) / (conditions.length + 1)) * 100}%`,
+            background: '#1976d2',
+          }}
+        />
+      ))}
     </Paper>
   );
 };
