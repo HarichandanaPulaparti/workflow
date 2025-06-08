@@ -1,0 +1,82 @@
+import React from 'react';
+import { Handle, Position } from 'reactflow';
+import {
+  Paper,
+  Typography,
+  IconButton,
+  Box,
+} from '@mui/material';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded'; // Action icon
+
+interface ActionNodeProps {
+  data: {
+    label: string;
+    toggleCollapse?: () => void;
+    collapsed?: boolean;
+    config?: { name?: string };
+  };
+}
+
+const ActionNode: React.FC<ActionNodeProps> = ({ data }) => {
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        borderRadius: 2,
+        minWidth: 200,
+        backgroundColor: '#fafafa',
+        border: '1px solid #e0e0e0',
+        fontSize: 13,
+        overflow: 'hidden',
+        '&:hover': {
+    boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
+    transform: 'translateY(-2px)',
+    transition: '0.2s ease',
+            }
+      }}
+    >
+      {/* Header */}
+      <Box
+        px={1.5}
+        py={1}
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{ backgroundColor: 'lightgray', borderBottom: '1px solid #e0e0e0' }}
+      >
+        <Box display="flex" alignItems="center" gap={1}>
+          <EmailRoundedIcon fontSize="small" color="primary" />
+          <Typography fontSize={13} fontWeight={600}>
+            {data.label}
+          </Typography>
+        </Box>
+
+        {data.toggleCollapse && (
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              data.toggleCollapse?.();
+            }}
+          >
+            {data.collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+          </IconButton>
+        )}
+      </Box>
+
+      {/* Body */}
+      <Box px={1.5} py={1}>
+        <Typography fontSize={12} color="text.secondary">
+          {data.config?.name || 'Action Config'}
+        </Typography>
+      </Box>
+
+      <Handle type="target" position={Position.Top} />
+      <Handle type="source" position={Position.Bottom} />
+    </Paper>
+  );
+};
+
+export default ActionNode;
