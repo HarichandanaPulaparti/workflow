@@ -14,14 +14,16 @@ interface Condition {
   id: string;
   label: string;
   expression: string;
+  
 }
 
 interface DecisionNodeProps {
   data: {
+        id: string; 
     label: string;
-    toggleCollapse?: () => void;
+        toggleCollapse?: (id: string) => void;
     collapsed?: boolean;
-    config?: {
+   config?: {
       name?: string;
       condition?: string; // legacy
       conditions?: Condition[];
@@ -70,7 +72,7 @@ const DecisionNode: React.FC<DecisionNodeProps> = ({ data }) => {
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              data.toggleCollapse?.();
+              data.toggleCollapse?.(data.id);
             }}
           >
             {data.collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}

@@ -17,6 +17,8 @@ interface NodeDrawerProps {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   addCopiedNode: (node: Node) => void;
+    toggleCollapse: (id: string) => void; 
+
 }
 
 const NodeDrawer: React.FC<NodeDrawerProps> = ({ open, onClose, node, setNodes, setEdges, addCopiedNode }) => {

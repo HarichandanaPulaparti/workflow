@@ -7,7 +7,8 @@ export interface Condition {
 export interface CustomNodeData {
   label?: string;
   collapsed?: boolean;
-  toggleCollapse?: () => void;
+    toggleCollapse?: (id: string) => void; 
+
   config: {
   name?: string;
   source?: string;
@@ -17,10 +18,10 @@ export interface CustomNodeData {
   result?: string;
   status?: string;
 
-  condition?: string; // for backward compatibility
-  conditions?: Condition[]; // NEW
+  condition?: string; 
+  conditions?: Condition[]; 
 
-  // You can add more fields later as needed.
+ 
 };
 
 }

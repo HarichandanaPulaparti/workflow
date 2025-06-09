@@ -1,3 +1,4 @@
+
 import React, { useCallback, useState } from 'react';
 import {
   ReactFlow,
@@ -9,7 +10,6 @@ import {
   Edge,
   Connection,
 } from 'reactflow';
-
 import 'reactflow/dist/style.css';
 import './flow.css';
 import StartNode from '../components/StartNode';
@@ -28,8 +28,8 @@ import {
   TextField,
   DialogActions,
   Button,
-  Typography,
 } from '@mui/material';
+import initialData from '../initialdata.json';
 
 const nodeTypes = {
   start: StartNode,
@@ -38,92 +38,9 @@ const nodeTypes = {
   terminal: TerminalNode,
 };
 
-const initialNodes: Node<CustomNodeData>[] = [
-  {
-    id: '1',
-    type: 'start',
-    data: {
-      label: 'Start Node',
-      config: { name: 'Webhook or Input' },
-      collapsed: false,
-    },
-    position: { x: 250, y: 5 },
-  },
-  {
-    id: '2',
-    type: 'action',
-    data: {
-      label: 'Action Node',
-      config: { name: 'Send Email', to: 'user@example.com' },
-      collapsed: false,
-    },
-    position: { x: 250, y: 100 },
-  },
-  {
-    id: '3',
-    type: 'decision',
-    data: {
-      label: 'Decision Node?',
-      config: {
-        name: 'User Region?',
-        conditions: [
-          { id: 'usa', label: 'USA', expression: 'country === "US"' },
-          { id: 'india', label: 'India', expression: 'country === "IN"' },
-          { id: 'other', label: 'Other', expression: 'country !== "US" && country !== "IN"' }
-        ]
-      },
-      collapsed: false,
-    },
-    position: { x: 250, y: 200 },
-  },
-  {
-    id: '4',
-    type: 'terminal',
-    data: {
-      label: 'Done',
-      config: { name: 'Done', status: 'success' },
-      collapsed: false,
-    },
-    position: { x: 250, y: 300 },
-  },
-  {
-    id: '5',
-    type: 'terminal',
-    data: {
-      label: 'Rejected',
-      config: { name: 'Rejected', status: 'failure' },
-      collapsed: false,
-    },
-    position: { x: 400, y: 300 },
-  },
-  {
-    id: '6',
-    type: 'terminal',
-    data: { label: 'Route to USA Team', config: { name: 'US Route', status: 'end' }, collapsed: false },
-    position: { x: 50, y: 300 },
-  },
-  {
-    id: '7',
-    type: 'terminal',
-    data: { label: 'Route to India Team', config: { name: 'India Route', status: 'end' }, collapsed: false },
-    position: { x: 250, y: 300 },
-  },
-  {
-    id: '8',
-    type: 'terminal',
-    data: { label: 'Route to Others', config: { name: 'Other Route', status: 'end' }, collapsed: false },
-    position: { x: 450, y: 300 },
-  }
-];
-
-const initialEdges: CustomEdge[] = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3', animated: true },
-];
-
 const Flow: React.FC = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<CustomNodeData>(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState<CustomNodeData>(initialData.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<CustomEdge>(initialData.edges);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number; edge: Edge | null } | null>(null);
@@ -152,7 +69,7 @@ const Flow: React.FC = () => {
   const handleConditionSave = () => {
     if (!selectedEdge || !selectedConditionId) return;
 
-    const sourceNodeIndex = nodes.findIndex(n => n.id === selectedEdge.source);
+    const sourceNodeIndex = nodes.findIndex((n) => n.id === selectedEdge.source);
     if (selectedConditionId === '__new__' && newConditionLabel && newConditionExpression && sourceNodeIndex !== -1) {
       const newId = newConditionLabel.toLowerCase().replace(/\s+/g, '-');
       const newCondition = { id: newId, label: newConditionLabel, expression: newConditionExpression };
@@ -164,7 +81,7 @@ const Flow: React.FC = () => {
           conditions: [...(updatedNode.data.config.conditions || []), newCondition],
         },
       };
-      setNodes(prev => {
+      setNodes((prev) => {
         const copy = [...prev];
         copy[sourceNodeIndex] = updatedNode;
         return copy;
@@ -172,7 +89,10 @@ const Flow: React.FC = () => {
       setSelectedConditionId(newId);
     }
 
-    const finalConditionId = selectedConditionId === '__new__' ? newConditionLabel.toLowerCase().replace(/\s+/g, '-') : selectedConditionId;
+    const finalConditionId =
+      selectedConditionId === '__new__'
+        ? newConditionLabel.toLowerCase().replace(/\s+/g, '-')
+        : selectedConditionId;
     const edgeId = `e${selectedEdge.source}-${selectedEdge.target}-${finalConditionId}`;
 
     const customEdge: CustomEdge = {
@@ -221,10 +141,12 @@ const Flow: React.FC = () => {
     }
   };
 
-  const onNodeClick = (_event: React.MouseEvent, node: Node<CustomNodeData>) => {
-    setSelectedNodeId(node.id);
-    setDrawerOpen(true);
-  };
+const onNodeClick = (_: React.MouseEvent, node: Node<CustomNodeData>) => {
+  setSelectedNodeId(node.id);
+  setDrawerOpen(true);
+};
+
+
 
   const handleLabelSave = () => {
     if (labelEdge) {
@@ -233,6 +155,72 @@ const Flow: React.FC = () => {
     setLabelDialogOpen(false);
     setLabelEdge(null);
   };
+
+  const addCopiedNode = useCallback((originalNode: Node) => {
+  const newId = (nodes.length + 1).toString();
+
+  const newNode: Node = {
+    id: newId,
+    type: originalNode.type,
+    position: {
+      x: originalNode.position.x + 50,
+      y: originalNode.position.y + 50,
+    },
+    data: {
+      ...JSON.parse(JSON.stringify(originalNode.data)),
+      id: newId, 
+    },
+  };
+
+  setNodes((prev) => [...prev, newNode]);
+}, [nodes, setNodes]);
+
+
+
+  const toggleCollapse = useCallback((id: string) => {
+  const toggledNode = nodes.find(n => n.id === id);
+  if (!toggledNode) return;
+
+  const isCollapsing = !toggledNode.data.collapsed;
+  const descendants = findDescendants(id, edges);
+
+  const updatedNodes = nodes.map(n => {
+    if (n.id === id) {
+      return {
+        ...n,
+        hidden: false,
+        data: {
+          ...n.data,
+          collapsed: isCollapsing,
+        },
+      };
+    }
+
+    // Hide only subtree
+    if (descendants.has(n.id)) {
+      return {
+        ...n,
+        hidden: isCollapsing,
+      };
+    }
+
+    return n;
+  });
+
+  const updatedEdges = edges.map(e => {
+    const sourceHidden = descendants.has(e.source);
+    const targetHidden = descendants.has(e.target);
+    return {
+      ...e,
+      hidden: isCollapsing && (sourceHidden || targetHidden),
+    };
+  });
+
+  setNodes(updatedNodes);
+  setEdges(updatedEdges);
+}, [nodes, edges]);
+
+
 
   const buttonStyle: React.CSSProperties = {
     background: '#f9f9f9',
@@ -244,11 +232,177 @@ const Flow: React.FC = () => {
     textAlign: 'left',
     minWidth: '150px',
   };
+  const collapsedNodeIds = new Set(
+  nodes.filter((n) => n.data.collapsed).map((n) => n.id)
+);
+function getDescendants(
+  nodeId: string,
+  edges: Edge[]
+): Set<string> {
+  const visited = new Set<string>();
+  const queue = [nodeId];
+
+  while (queue.length) {
+    const current = queue.shift();
+    if (!current) continue;
+
+    for (const edge of edges) {
+      if (edge.source === current && !visited.has(edge.target)) {
+        visited.add(edge.target);
+        queue.push(edge.target);
+      }
+    }
+  }
+
+  return visited;
+}
+
+const hiddenNodeIds = new Set<string>();
+collapsedNodeIds.forEach((id) => {
+  const descendants = getDescendants(id, edges);
+  descendants.forEach((d) => hiddenNodeIds.add(d));
+});
+
+const visibleNodes = nodes.map((n) =>
+  hiddenNodeIds.has(n.id)
+    ? { ...n, hidden: true }
+    : { ...n, hidden: false }
+);
+
+// const enhancedNodes = visibleNodes.map((node) => ({
+//   ...node,
+//   data: {
+//     ...node.data,
+//     toggleCollapse,
+//     id: node.id,
+//   },
+// }));
+const enhancedNodes = nodes.map((node) => ({
+  ...node,
+  hidden: hiddenNodeIds.has(node.id),
+  data: {
+    ...node.data,
+    toggleCollapse,
+    id: node.id,
+  },
+}));
+
+
+
+
+const findDescendants = (rootId: string, edges: Edge[]): Set<string> => {
+  const visited = new Set<string>();
+  const stack = [rootId];
+
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    for (const edge of edges) {
+      if (edge.source === current && !visited.has(edge.target)) {
+        visited.add(edge.target);
+        stack.push(edge.target);
+      }
+    }
+  }
+
+  visited.delete(rootId); 
+  return visited;
+};
+const getId = (() => {
+  let id = nodes.length + 1;
+  return () => `${id++}`;
+})();
+const addStartNode = () => {
+  const newNode: Node<CustomNodeData> = {
+    id: getId(),
+    type: 'start',
+    data: {
+      label: 'New Start',
+      config: { name: 'Webhook or Input' },
+      collapsed: false,
+    },
+    position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+  };
+  setNodes((nds) => [...nds, newNode]);
+};
+
+const addActionNode = () => {
+  const newNode: Node<CustomNodeData> = {
+    id: getId(),
+    type: 'action',
+    data: {
+      label: 'New Action',
+      config: { name: 'Send Email', to: 'someone@example.com' },
+      collapsed: false,
+    },
+    position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+  };
+  setNodes((nds) => [...nds, newNode]);
+};
+
+const addDecisionNode = () => {
+  const newNode: Node<CustomNodeData> = {
+    id: getId(),
+    type: 'decision',
+    data: {
+      label: 'New Decision',
+      config: {
+        name: 'Decision?',
+        conditions: [],
+      },
+      collapsed: false,
+    },
+    position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+  };
+  setNodes((nds) => [...nds, newNode]);
+};
+
+const addTerminalNode = () => {
+  const newNode: Node<CustomNodeData> = {
+    id: getId(),
+    type: 'terminal',
+    data: {
+      label: 'New Terminal',
+      config: { status: 'success' },
+      collapsed: false,
+    },
+    position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+  };
+  setNodes((nds) => [...nds, newNode]);
+};
+
+const handleDownload = () => {
+  const blob = new Blob([JSON.stringify({ nodes, edges }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'workflow.json';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const { nodes: loadedNodes, edges: loadedEdges } = JSON.parse(event.target?.result as string);
+      setNodes(loadedNodes);
+      setEdges(loadedEdges);
+    } catch (err) {
+      alert('Invalid workflow file!');
+    }
+  };
+  reader.readAsText(file);
+};
+
+
 
   return (
     <div className="custom-grid-background">
       <ReactFlow
-        nodes={nodes}
+        nodes={enhancedNodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
@@ -266,13 +420,17 @@ const Flow: React.FC = () => {
           node={selectedNode}
           setNodes={setNodes}
           setEdges={setEdges}
-          addCopiedNode={() => {}}
+          addCopiedNode={addCopiedNode}
+          toggleCollapse={toggleCollapse}
         />
         <div style={{ position: 'absolute', top: 80, left: 20, background: '#ffffff', padding: '12px', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: '10px', zIndex: 30 }}>
-          <button style={buttonStyle}>+ Start Node</button>
-          <button style={buttonStyle}>+ Action Node</button>
-          <button style={buttonStyle}>+ Decision Node</button>
-          <button style={buttonStyle}>+ Terminal Node</button>
+          <button style={buttonStyle} onClick={addStartNode}>+ Start Node</button>
+  <button style={buttonStyle} onClick={addActionNode}>+ Action Node</button>
+  <button style={buttonStyle} onClick={addDecisionNode}>+ Decision Node</button>
+  <button style={buttonStyle} onClick={addTerminalNode}>+ Terminal Node</button>
+  <button style={buttonStyle} onClick={handleDownload}>⬇️ Download Workflow</button>
+<input type="file" accept=".json" onChange={handleUpload} style={{ marginTop: 8 }} />
+
         </div>
       </ReactFlow>
 
@@ -296,20 +454,8 @@ const Flow: React.FC = () => {
           </TextField>
           {selectedConditionId === '__new__' && (
             <>
-              <TextField
-                margin="dense"
-                label="New Condition Label"
-                fullWidth
-                value={newConditionLabel}
-                onChange={(e) => setNewConditionLabel(e.target.value)}
-              />
-              <TextField
-                margin="dense"
-                label="Condition Expression"
-                fullWidth
-                value={newConditionExpression}
-                onChange={(e) => setNewConditionExpression(e.target.value)}
-              />
+              <TextField margin="dense" label="New Condition Label" fullWidth value={newConditionLabel} onChange={(e) => setNewConditionLabel(e.target.value)} />
+              <TextField margin="dense" label="Condition Expression" fullWidth value={newConditionExpression} onChange={(e) => setNewConditionExpression(e.target.value)} />
             </>
           )}
         </DialogContent>
@@ -322,15 +468,7 @@ const Flow: React.FC = () => {
       <Dialog open={labelDialogOpen} onClose={() => setLabelDialogOpen(false)}>
         <DialogTitle>Edit Edge Label</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Edge Label"
-            fullWidth
-            variant="outlined"
-            value={labelInput}
-            onChange={(e) => setLabelInput(e.target.value)}
-          />
+          <TextField autoFocus margin="dense" label="Edge Label" fullWidth variant="outlined" value={labelInput} onChange={(e) => setLabelInput(e.target.value)} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setLabelDialogOpen(false)}>Cancel</Button>

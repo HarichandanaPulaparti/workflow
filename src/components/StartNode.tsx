@@ -12,8 +12,9 @@ import SensorsRoundedIcon from '@mui/icons-material/SensorsRounded';
 
 interface StartNodeProps {
   data: {
+            id: string;
     label: string;
-    toggleCollapse?: () => void;
+            toggleCollapse?: (id: string) => void;
     collapsed?: boolean;
     config?: { name?: string };
   };
@@ -59,7 +60,8 @@ const StartNode: React.FC<StartNodeProps> = ({ data }) => {
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              data.toggleCollapse?.();
+                            data.toggleCollapse?.(data.id);
+
             }}
           >
             {data.collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}

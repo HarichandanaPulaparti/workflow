@@ -8,16 +8,18 @@ import {
 } from '@mui/material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded'; // Action icon
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 
 interface ActionNodeProps {
   data: {
+    id: string;
     label: string;
-    toggleCollapse?: () => void;
+    toggleCollapse?: (id: string) => void;
     collapsed?: boolean;
     config?: { name?: string };
   };
 }
+
 
 const ActionNode: React.FC<ActionNodeProps> = ({ data }) => {
   return (
@@ -31,10 +33,10 @@ const ActionNode: React.FC<ActionNodeProps> = ({ data }) => {
         fontSize: 13,
         overflow: 'hidden',
         '&:hover': {
-    boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
-    transform: 'translateY(-2px)',
-    transition: '0.2s ease',
-            }
+          boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
+          transform: 'translateY(-2px)',
+          transition: '0.2s ease',
+        },
       }}
     >
       {/* Header */}
@@ -53,12 +55,12 @@ const ActionNode: React.FC<ActionNodeProps> = ({ data }) => {
           </Typography>
         </Box>
 
-        {data.toggleCollapse && (
+        {typeof data.collapsed === 'boolean' && data.toggleCollapse && (
           <IconButton
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              data.toggleCollapse?.();
+              data.toggleCollapse?.(data.id); 
             }}
           >
             {data.collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
@@ -66,13 +68,15 @@ const ActionNode: React.FC<ActionNodeProps> = ({ data }) => {
         )}
       </Box>
 
-      {/* Body */}
-      <Box px={1.5} py={1}>
-        <Typography fontSize={12} color="text.secondary">
-          {data.config?.name || 'Action Config'}
-        </Typography>
-      </Box>
+      {!data.collapsed && (
+        <Box px={1.5} py={1}>
+          <Typography fontSize={12} color="text.secondary">
+            {data.config?.name || 'Action Config'}
+          </Typography>
+        </Box>
+      )}
 
+      {/* Always show handles */}
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
     </Paper>
