@@ -1,0 +1,55 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "start",
+      "data": {
+        "label": "Webhook Trigger",
+        "config": { "name": "Incoming Event" },
+        "collapsed": false
+      },
+      "position": { "x": 250, "y": 5 }
+    },
+    {
+      "id": "2",
+      "type": "action",
+      "data": {
+        "label": "Send Welcome Email",
+        "config": { "name": "Send Email", "to": "newuser@example.com" },
+        "collapsed": false
+      },
+      "position": { "x": 250, "y": 100 }
+    },
+    {
+      "id": "3",
+      "type": "decision",
+      "data": {
+        "label": "Check Region",
+        "config": {
+          "name": "User Region",
+          "conditions": [
+            { "id": "us", "label": "USA", "expression": "country === 'US'" },
+            { "id": "in", "label": "India", "expression": "country === 'IN'" },
+            { "id": "other", "label": "Others", "expression": "true" }
+          ]
+        },
+        "collapsed": false
+      },
+      "position": { "x": 250, "y": 200 }
+    },
+    {
+      "id": "4",
+      "type": "terminal",
+      "data": {
+        "label": "Complete",
+        "config": { "name": "Done", "status": "success" },
+        "collapsed": false
+      },
+      "position": { "x": 250, "y": 300 }
+    }
+  ],
+  "edges": [
+    { "id": "e1-2", "source": "1", "target": "2", "animated": true },
+    { "id": "e2-3", "source": "2", "target": "3", "animated": true }
+  ]
+}
